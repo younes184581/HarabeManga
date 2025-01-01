@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script type="module" src="js/firebase.js"></script>
+</head>
+<body class="require-auth">
+    <header>
+        <nav class="navbar">
+            <div class="logo">HarabeManga</div>
+<li class="home"><a href="index.html" style="text-decoration: none; color: white"><i class="fas fa-home"></i> الرئيسية</a></li>
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+        </nav>        
+    </header>
+    <main>
+        <div class="profile-container">
+            <h1>الملف الشخصي</h1>
+            <div class="profile-info">
+                <div class="profile-picture-container" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; position: relative;">
+                    <img src="img/pfp.jpg" alt="صورة الملف الشخصي" id="profile-picture" style="width: 100%; height: 100%; object-fit: cover;">
+                    <label for="profile-picture-upload" class="profile-picture-upload-label">
+                        <i class="fas fa-camera"></i>
+                        <input type="file" id="profile-picture-upload" accept="image/*" style="display: none;">
+                    </label>
+                </div>
+                <div class="profile-details">
+                    <p><strong>اسم المستخدم:</strong> 
+                        <span id="profile-username"></span>
+                        <i class="fas fa-crown admin-icon" id="admin-crown" style="display: none; color: gold; margin-right: 5px;"></i>
+                    </p>
+                    <p><strong>البريد الإلكتروني:</strong> <span id="profile-email"></span></p>
+                    <button id="profile-logout-btn">تسجيل الخروج</button>
+                </div>
+            </div>
+            <div class="profile-settings">
+                <h2>إعدادات الملف الشخصي</h2>
+                <div class="form-group">
+                    <label for="profile-bio">نبذة عنك:</label>
+                    <textarea id="profile-bio" maxlength="200"></textarea>
+                </div>
+                <button id="save-profile-btn">حفظ التغييرات</button>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        // Initialize Firebase
+        const database = firebase.database();
+
+        // Reference to notifications
+        const notificationsRef = database.ref('admin/notifications');
+
+        // Listen for new notifications
+        // Filter notifications
+        const filterNotifications = () => {
+            const typeFilter = document.getElementById('notification-filter').value;
+            const statusFilter = document.getElementById('notification-status').value;
+            
+            const notifications = Array.from(document.querySelectorAll('.notification'));
+            notifications.forEach(notification => {
+                const typeMatch = typeFilter === 'all' || 
+                    (typeFilter === 'feedback' && notification.querySelector('.notification-rating')) ||
+                    (typeFilter === 'system' && !notification.querySelector('.notification-rating'));
+                
+                const statusMatch = statusFilter === 'all' ||
+                    (statusFilter === 'unread' && !notification.classList.contains('read')) ||
+                    (statusFilter === 'read' && notification.classList.contains('read')) ||
+                    (statusFilter === 'resolved' && notification.classList.contains('resolved'));
+                
+                notification.style.display = (typeMatch && statusMatch) ? '' : 'none';
+            });
+        };
+
+        // Add event listeners to filter controls
+        document.getElementById('notification-filter').addEventListener('change', filterNotifications);
+        document.getElementById('notification-status').addEventListener('change', filterNotifications);
+
+        // Handle mark as read and resolve actions
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('mark-read')) {
+                const notification = e.target.closest('.notification');
+                notification.classList.add('read');
+                const notificationId = e.target.dataset.id;
+                const notificationRef = database.ref(`admin/notifications/${notificationId}`);
+                notificationRef.update({ status: 'read' });
+                filterNotifications();
+            }
+            
+            if (e.target.classList.contains('resolve')) {
+                const notification = e.target.closest('.notification');
+                notification.classList.add('resolved');
+                const notificationId = e.target.dataset.id;
+                const notificationRef = database.ref(`admin/notifications/${notificationId}`);
+                notificationRef.update({ status: 'resolved' });
+                filterNotifications();
+            }
+        });
+
+        notificationsRef.on('child_added', (snapshot) => {
+            const notification = snapshot.val();
+            const notificationElement = document.createElement('div');
+            notificationElement.className = 'notification';
+            notificationElement.innerHTML = `
+                <div class="notification-header">
+                    <span class="notification-title">${notification.title}</span>
+                    <span class="notification-time">${new Date(notification.timestamp).toLocaleString()}</span>
+                </div>
+                <div class="notification-body">
+                    ${notification.body}
+                    ${notification.rating ? `<div class="notification-rating">Rating: ${'★'.repeat(notification.rating)}${'☆'.repeat(5 - notification.rating)}</div>` : ''}
+                    <div class="notification-actions">
+                        <button class="mark-read" data-id="${snapshot.key}">Mark as Read</button>
+                        ${notification.status !== 'resolved' ? `<button class="resolve" data-id="${snapshot.key}">Resolve</button>` : ''}
+                    </div>
+                </div>
+            `;
+            document.getElementById('notifications-container').prepend(notificationElement);
+        });
+    </script>
+    <script type="module">
+      import { auth, database } from './js/firebase.js';
+      import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+      import { ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
+
+      const profileEmail = document.getElementById('profile-email');
+      const profileUsername = document.getElementById('profile-username');
+      const profilePicture = document.getElementById('profile-picture');
+      const logoutBtn = document.getElementById('profile-logout-btn');
+      const profileBio = document.getElementById('profile-bio');
+      const saveProfileBtn = document.getElementById('save-profile-btn');
+      const profilePictureUpload = document.getElementById('profile-picture-upload');
+
+      // Handle auth state changes
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          console.log('User authenticated:', user);
+          profileEmail.textContent = user.email;
+          profileUsername.textContent = user.displayName || user.email.split('@')[0];
+          
+          // Load profile data
+          const profileRef = ref(database, `users/${user.uid}/profile`);
+          onValue(profileRef, (snapshot) => {
+            const profileData = snapshot.val();
+            if (profileData) {
+              if (profileData.profilePicture) {
+                profilePicture.src = profileData.profilePicture;
+              }
+              if (profileData.bio) {
+                profileBio.value = profileData.bio;
+              }
+            }
+          });
+
+          // Check admin status
+          const checkAdminStatus = async () => {
+            try {
+              const adminRef = ref(database, `admins/${user.uid}`);
+              const adminSnapshot = await get(adminRef);
+              
+              if (adminSnapshot.exists() && adminSnapshot.val() === true) {
+                return true;
+              }
+              
+              const profileRef = ref(database, `users/${user.uid}/profile`);
+              const profileSnapshot = await get(profileRef);
+              
+              if (profileSnapshot.exists() && profileSnapshot.val().isAdmin === true) {
+                return true;
+              }
+              
+              return false;
+            } catch (error) {
+              console.error('Error checking admin status:', error);
+              return false;
+            }
+          };
+
+          checkAdminStatus().then(isAdmin => {
+            if (isAdmin) {
+              const adminCrown = document.getElementById('admin-crown');
+              if (adminCrown) {
+                adminCrown.style.display = 'inline-block';
+              }
+            }
+          });
+        } else {
+          window.location.href = 'auth.html';
+        }
+      });
+
+      // Handle profile picture upload
+      profilePictureUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              
+              const maxSize = 150;
+              let width = img.width;
+              let height = img.height;
+              
+              if (width > height) {
+                if (width > maxSize) {
+                  height *= maxSize / width;
+                  width = maxSize;
+                }
+              } else {
+                if (height > maxSize) {
+                  width *= maxSize / height;
+                  height = maxSize;
+                }
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              const base64 = canvas.toDataURL('image/jpeg', 0.8);
+              
+              profilePicture.src = base64;
+              
+              const user = auth.currentUser;
+              if (user) {
+                const profileRef = ref(database, `users/${user.uid}/profile`);
+                set(profileRef, {
+                  profilePicture: base64
+                }, { merge: true });
+              }
+            };
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Handle profile save
+      saveProfileBtn.addEventListener('click', () => {
+        const user = auth.currentUser;
+        if (user) {
+          if (profileBio.value.trim() === '') {
+            alert('الرجاء إدخال نبذة عنك');
+            return;
+          }
+
+          const profileRef = ref(database, `users/${user.uid}/profile`);
+          
+          onValue(profileRef, (snapshot) => {
+            if (!snapshot.exists()) {
+              set(profileRef, {})
+                .then(() => {
+                  console.log('Profile node created');
+                })
+                .catch((error) => {
+                  console.error('Error creating profile node:', error);
+                });
+            }
+          });
+
+          set(profileRef, {
+            bio: profileBio.value.trim(),
+            lastUpdated: new Date().toISOString()
+          }, { merge: true })
+            .then(() => {
+              alert('تم حفظ التغييرات بنجاح');
+            })
+            .catch((error) => {
+              console.error('Error saving profile:', error);
+              alert('حدث خطأ أثناء حفظ التغييرات');
+            });
+        } else {
+          alert('الرجاء تسجيل الدخول أولاً');
+          window.location.href = 'auth.html';
+        }
+      });
+
+      // Handle logout
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error('Error signing out:', error);
+        }
+      });
+    </script>
+</body>
+</html>

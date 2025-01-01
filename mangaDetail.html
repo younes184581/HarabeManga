@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Detail</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/mangaDetail.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="require-auth">
+    <header>
+        <nav class="navbar">
+            <div class="logo">HarabeManga</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="mangaList.html"><i class="fas fa-book"></i> قائمة المانجا</a></li>
+                <li><a href="tags.html"><i class="fas fa-tags"></i> التصنيفات</a></li>
+                <li><a href="joinUs.html"><i class="fa-brands fa-discord"></i> انضم إلينا</a></li>
+                <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Bookmarks</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="manga-header">
+            <img id="manga-cover" src="" alt="Manga Cover" class="manga-cover">
+            <div class="manga-info">
+            <h2 id="manga-title">Cover Title</h2>
+            <p id="description">Description of the manga goes here.</p>
+            <div class="tags-container" id="tags-container"></div>
+            </div>
+        </div>
+        <div class="chapters-controls">
+            <button id="reverse-button" class="reverse-button" title="Reverse chapter order">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+        </div>
+        <div class="chapters" id="chapters-container">
+            <!-- Chapters will be dynamically added here -->
+        </div>
+    </main>
+    
+    <script type="module" src="js/firebase.js"></script>
+    <script src="js/showmorebutton.js"></script>
+    <script type="module" src="js/script.js"></script>
+    <script type="module">
+      import { auth, database, firebaseConfig } from './js/firebase.js';
+      import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+      import { ref, set, get, push, onValue } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
+
+      // Get manga ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const mangaId = urlParams.get('mangaId');
+      console.log('Manga ID from URL:', mangaId);
+
+      // Check authentication status
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // Track manga view for authenticated users
+          const mangaViewRef = ref(database, `users/${user.uid}/mangaViews/${mangaId}`);
+          set(mangaViewRef, {
+            timestamp: Date.now()
+          });
+
+          // Enable comment submission
+          const commentInput = document.getElementById('comment-input');
+          const submitComment = document.getElementById('submit-comment');
+          const commentsContainer = document.getElementById('comments-container');
+
+          submitComment.addEventListener('click', async () => {
+            try {
+              const commentText = commentInput.value.trim();
+              if (commentText) {
+                console.log('User authenticated:', user);
+                console.log('Manga ID:', mangaId);
+                
+                // Verify Firebase initialization
+                if (!auth || !database) {
+                  throw new Error('Firebase not properly initialized');
+                }
+                
+                // Verify user authentication
+                if (!user || !user.uid) {
+                  throw new Error('User is not authenticated');
+                }
+                
+                // Create comment data
+                const commentData = {
+                  text: commentText,
+                  userId: user.uid,
+                  userPfp: user.photoURL || 'img/pfp.jpg',
+                  username: user.displayName || 'مستخدم',
+                  timestamp: Date.now(),
+                  likes: 0,
+                  replies: {}
+                };
+                
+                console.log('Comment data:', commentData);
+                
+                // Create database references
+                const commentsRef = ref(database, `manga/${mangaId}/comments`);
+                console.log('Database path:', `manga/${mangaId}/comments`);
+                
+                if (!commentsRef) {
+                  throw new Error('Failed to create database reference');
+                }
+                
+                const newCommentRef = push(commentsRef);
+                console.log('New comment reference:', newCommentRef);
+                
+                if (!newCommentRef) {
+                  throw new Error('Failed to create new comment reference');
+                }
+                
+                // Test write operation
+                const testRef = ref(database, 'test');
+                try {
+                  console.log('Attempting test write operation to path:', testRef.toString());
+                  console.log('Database instance:', database);
+                  console.log('Current user:', user);
+                  
+                  await set(testRef, { 
+                    test: 'test', 
+                    timestamp: Date.now(),
+                    userId: user.uid 
+                  });
+                  
+                  console.log('Test write operation successful');
+                  
+                  // Verify the write
+                  const testSnapshot = await get(testRef);
+                  console.log('Test write verification:', testSnapshot.val());
+                } catch (error) {
+                  console.error('Test write operation failed:', {
+                    message: error.message,
+                    code: error.code,
+                    stack: error.stack
+                  });
+                  throw error;
+                }
+                
+                // Write the actual comment
+                console.log('Attempting to post comment...');
+                await set(newCommentRef, commentData);
+                console.log('Comment successfully posted');
+                commentInput.value = '';
+              }
+            } catch (error) {
+              console.error('Error posting comment:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+              });
+              
+              // Additional debugging
+              console.log('Current authentication state:', {
+                user: user,
+                auth: auth
+              });
+              
+              console.log('Database instance:', database);
+              
+              console.log('Firebase configuration:', {
+                apiKey: firebaseConfig.apiKey,
+                databaseURL: firebaseConfig.databaseURL
+              });
+            }
+          });
+        } else {
+          const submitComment = document.getElementById('submit-comment');
+          const commentInput = document.getElementById('comment-input');
+          submitComment.disabled = true;
+          commentInput.placeholder = 'يجب تسجيل الدخول لإضافة تعليق';
+        }
+      });
+
+      // Load and display comments
+      const loadComments = () => {
+        const commentsRef = ref(database, `manga/${mangaId}/comments`);
+        onValue(commentsRef, (snapshot) => {
+          const commentsContainer = document.getElementById('comments-container');
+          commentsContainer.innerHTML = '';
+          snapshot.forEach((childSnapshot) => {
+            const comment = childSnapshot.val();
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment';
+            commentElement.innerHTML = `
+              <div class="comment-header">
+                <img src="${comment.userPfp}" alt="Profile Picture" class="user-avatar">
+                <div class="user-info">
+                  <span class="comment-author">${comment.username}</span>
+                  <span class="comment-date">${new Date(comment.timestamp).toLocaleString()}</span>
+                </div>
+              </div>
+              <div class="comment-content">${comment.text}</div>
+              <div class="comment-actions">
+                <span class="comment-action like-comment" data-comment-id="${childSnapshot.key}">إعجاب (${comment.likes})</span>
+                <span class="comment-action reply-comment" data-comment-id="${childSnapshot.key}">رد</span>
+              </div>
+              <div class="reply-form" id="reply-form-${childSnapshot.key}" style="display: none;">
+                <textarea class="reply-input" placeholder="اكتب ردك هنا..."></textarea>
+                <button class="submit-reply">نشر الرد</button>
+              </div>
+              <div class="replies-container" id="replies-${childSnapshot.key}"></div>
+            `;
+            commentsContainer.appendChild(commentElement);
+
+            // Add like functionality
+            const likeButton = commentElement.querySelector('.like-comment');
+            likeButton.addEventListener('click', async () => {
+              if (user) {
+                const commentRef = ref(database, `manga/${mangaId}/comments/${childSnapshot.key}`);
+                const commentSnapshot = await get(commentRef);
+                const currentLikes = commentSnapshot.val().likes || 0;
+                
+                // Check if user already liked
+                const userLikeRef = ref(database, `manga/${mangaId}/comments/${childSnapshot.key}/likes/${user.uid}`);
+                const userLikeSnapshot = await get(userLikeRef);
+                
+                if (userLikeSnapshot.exists()) {
+                  // Unlike
+                  await set(userLikeRef, null);
+                  await set(ref(database, `manga/${mangaId}/comments/${childSnapshot.key}/likes`), currentLikes - 1);
+                } else {
+                  // Like
+                  await set(userLikeRef, true);
+                  await set(ref(database, `manga/${mangaId}/comments/${childSnapshot.key}/likes`), currentLikes + 1);
+                }
+              }
+            });
+
+            // Add reply functionality
+            const replyButton = commentElement.querySelector('.reply-comment');
+            const replyForm = commentElement.querySelector(`#reply-form-${childSnapshot.key}`);
+            const replyInput = replyForm.querySelector('.reply-input');
+            const submitReply = replyForm.querySelector('.submit-reply');
+            const repliesContainer = commentElement.querySelector(`#replies-${childSnapshot.key}`);
+
+            replyButton.addEventListener('click', () => {
+              replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+            });
+
+            submitReply.addEventListener('click', async () => {
+              const replyText = replyInput.value.trim();
+              if (replyText && user) {
+                const replyData = {
+                  text: replyText,
+                  userId: user.uid,
+                  userPfp: user.photoURL || 'img/pfp.jpg',
+                  username: user.displayName || 'مستخدم',
+                  timestamp: Date.now()
+                };
+
+                const repliesRef = ref(database, `manga/${mangaId}/comments/${childSnapshot.key}/replies`);
+                await push(repliesRef, replyData);
+                replyInput.value = '';
+              }
+            });
+
+            // Load replies
+            const loadReplies = () => {
+              const repliesRef = ref(database, `manga/${mangaId}/comments/${childSnapshot.key}/replies`);
+              onValue(repliesRef, (snapshot) => {
+                repliesContainer.innerHTML = '';
+                snapshot.forEach((replySnapshot) => {
+                  const reply = replySnapshot.val();
+                  const replyElement = document.createElement('div');
+                  replyElement.className = 'reply';
+                  replyElement.innerHTML = `
+                    <div class="reply-header">
+                      <img src="${reply.userPfp}" alt="Profile Picture" class="user-avatar">
+                      <div class="user-info">
+                        <span class="reply-author">${reply.username}</span>
+                        <span class="reply-date">${new Date(reply.timestamp).toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div class="reply-content">${reply.text}</div>
+                  `;
+                  repliesContainer.appendChild(replyElement);
+                });
+              });
+            };
+
+            loadReplies();
+          });
+        });
+      };
+
+      // Manga data and initialization
+      const mangaData = {
+        1: {
+            title: "ليبوشي ماري",
+            description: "الممثلة المشهورة ماري في فندق الحب",
+            image: "https://files.fm/thumb_show.php?i=ahwabp4haa",
+            chapters: [
+                { id: 1, title: "ون شوت" },
+            ],
+            tags: ["أم", "بي بي سي", "مؤخرة كبيرة"]
+        },
+        2: {
+            title: "another manga 2",
+            description: "Description for another manga 2.",
+            image: "img/my-new-family-treats-me-well-cover_upscayl_8x_realesrgan-x4plus.png",
+            chapters: [
+                { id: 1, title: "Chapter 1" },
+                { id: 2, title: "Chapter 2" }
+            ],
+            tags: ["عائلة", "رومانسي", "دراما"]
+        },
+      };
+
+      let manga = mangaData[mangaId] || {
+        title: "Manga Title",
+        description: "Manga description goes here.",
+        image: "img/my-new-family-treats-me-well-cover_upscayl_8x_realesrgan-x4plus.png",
+        chapters: [
+          { id: 1, title: "Chapter 1" },
+          { id: 2, title: "Chapter 2" }
+        ],
+        tags: ["عام", "غير مصنف"]
+      };
+
+      document.getElementById('manga-cover').src = manga.image;
+      document.getElementById('manga-title').innerText = manga.title;
+      document.getElementById('description').innerText = manga.description;
+      
+      // Render tags
+      const tagsContainer = document.getElementById('tags-container');
+      if (manga.tags && manga.tags.length > 0) {
+        tagsContainer.innerHTML = manga.tags.map(tag => 
+          `<span class="tag">${tag}</span>`
+        ).join('');
+      } else {
+        tagsContainer.innerHTML = '<span class="tag">غير مصنف</span>';
+      }
+
+      const chaptersContainer = document.getElementById('chapters-container');
+      const reverseButton = document.getElementById('reverse-button');
+      let isReversed = false;
+
+      function renderChapters() {
+          chaptersContainer.innerHTML = '';
+          const chapters = isReversed ? [...manga.chapters].reverse() : manga.chapters;
+          chapters.forEach(chapter => {
+              const chapterLink = document.createElement('a');
+              chapterLink.href = `chapters.html?cover=${mangaId}&chapter=${chapter.id}`;
+              chapterLink.className = 'chapter-button';
+              chapterLink.innerText = chapter.title;
+              chaptersContainer.appendChild(chapterLink);
+          });
+      }
+
+      renderChapters();
+      reverseButton.addEventListener('click', () => {
+          isReversed = !isReversed;
+          renderChapters();
+      });
+
+      // Load comments
+      loadComments();
+
+      // Bookmark functionality
+      const bookmarkButton = document.getElementById('bookmark-button');
+      const mangaTitle = document.getElementById('manga-title').innerText;
+      const mangaCover = document.getElementById('manga-cover').src;
+
+      // Check if manga is bookmarked
+      function checkBookmark() {
+          const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+          if (bookmarks[mangaId]) {
+              bookmarkButton.classList.add('active');
+          }
+      }
+
+      // Toggle bookmark
+      bookmarkButton.addEventListener('click', () => {
+          const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+          if (bookmarks[mangaId]) {
+              delete bookmarks[mangaId];
+              bookmarkButton.classList.remove('active');
+              alert('Bookmark removed');
+          } else {
+              bookmarks[mangaId] = {
+                  title: mangaTitle,
+                  cover: mangaCover,
+                  timestamp: Date.now()
+              };
+              bookmarkButton.classList.add('active');
+              alert('Manga bookmarked');
+          }
+          localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      });
+
+      // Check bookmark status on page load
+      checkBookmark();
+    </script>
+    <!-- Bookmark Button -->
+    <div class="bookmark-button-container">
+        <button class="bookmark-button" id="bookmark-button" title="Bookmark this manga">
+            <i class="fas fa-bookmark"></i>
+        </button>
+    </div>
+    
+    <script src="js/humdark.js"></script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+/* Navigation Styles */
+body {
+    margin: 0;
+}
+
+
+.navbar {
+    background-color: #333;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #007bff;
+}
+
+/* Authentication Page Styles */
+body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    direction: rtl;
+}
+
+.auth-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.tab-link {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: #f0f0f0;
+    color: #666;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.tab-link.active {
+    background: #007bff;
+    color: #fff;
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background: #0056b3;
+}
+
+.auth-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    display: none;
+}
+
+.auth-message.success {
+    background: #d4edda;
+    color: #155724;
+    display: block;
+}
+
+.auth-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    display: block;
+}
+
+/* Profile Page Styles */
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.profile-picture-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #007bff;
+}
+
+.profile-picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.upload-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.profile-details {
+    width: 100%;
+    text-align: center;
+}
+
+.profile-details p {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+}
+
+#profile-logout-btn {
+    margin-top: 1.5rem;
+    padding: 0.75rem 2rem;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: relative;
+    top: -10px;
+}
+
+#profile-logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* Profile Picture Upload */
+.profile-picture-upload-label {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.profile-picture-upload-label:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Profile Settings */
+.profile-settings {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.profile-settings h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.profile-settings .form-group {
+    margin-bottom: 20px;
+}
+
+.profile-settings label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.profile-settings textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+#save-profile-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#save-profile-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-details {
+        margin-top: 20px;
+    }
+    
+    .profile-settings {
+        padding: 15px;
+    }
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 5px;
+}
+
+.close-modal {
+    color: #aaa;
+    float: left;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+.user-search {
+    margin-bottom: 20px;
+}
+
+.user-search input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.users-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-list th, .users-list td {
+    padding: 12px;
+    text-align: right;
+    border-bottom: 1px solid #ddd;
+}
+
+.users-list th {
+    background-color: #f5f5f5;
+}
+
+.users-list tr:hover {
+    background-color: #f9f9f9;
+}
+
+.user-details {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.user-info p {
+    margin: 10px 0;
+}
+
+.user-actions {
+    margin-top: 20px;
+}
+
+.user-actions button {
+    margin-left: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.user-actions button.danger {
+    background-color: #ff4444;
+    color: white;
+}
+
+.user-actions button.danger:hover {
+    background-color: #cc0000;
+}
+
+.user-actions button#save-user-changes {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.user-actions button#save-user-changes:hover {
+    background-color: #45a049;
+}
+
+/* Responsive Modal Styles */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        margin: 10% auto;
+    }
+    
+    .users-list th, .users-list td {
+        padding: 8px;
+    }
+}
+
+/* Feedback Form Styles */
+.feedback-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.feedback-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.feedback-button:hover {
+    background-color: #2980b9;
+    transform: scale(1.1);
+}
+
+.feedback-form {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    width: 300px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+}
+
+.feedback-form.visible {
+    display: block;
+}
+
+.feedback-form h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.feedback-form textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+.rating {
+    margin-bottom: 15px;
+}
+
+.star {
+    font-size: 24px;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star.active,
+.star:hover {
+    color: #f1c40f;
+}
+
+#submit-feedback {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#submit-feedback:hover {
+    background-color: #2980b9;
+}

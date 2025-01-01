@@ -1,0 +1,77 @@
+.notification-filters {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.notification-filters select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.notification-filters select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.notification.read {
+    opacity: 0.7;
+    background-color: #f8f9fa;
+}
+
+.notification.resolved {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+}
+
+.notification {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.notification-title {
+    font-weight: bold;
+}
+
+.notification-time {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.notification-body {
+    color: #444;
+}
+
+.notification-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.notification-actions button {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.mark-read {
+    background-color: #3498db;
+    color: white;
+}
+
+.resolve {
+    background-color: #4caf50;
+    color: white;
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga List</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/chapters.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">HarabeManga</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="mangaList.html"><i class="fas fa-book"></i> قائمة المانجا</a></li>
+                <li><a href="tags.html"><i class="fas fa-tags"></i> التصنيفات</a></li>
+                <li><a href="joinUs.html"><i class="fa-brands fa-discord"></i> انضم إلينا</a></li>
+                <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Bookmarks</a></li>
+                <li><a href="#" id="account-link"><i class="fas fa-user"></i>الحساب</a></li>
+            </ul>
+        </nav>        
+    </header>
+    <main>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search manga...">
+            <button id="search-button"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="manga-grid" id="manga-grid">
+            <!-- Manga items will be dynamically added here -->
+        </div>
+    </main>
+    
+    <script>
+        // Sample manga data
+        const mangaData = [
+            { title: "ليبوشي ماري", cover: "img/cover.png" },
+            { title: "My New Family Treats Me Well", cover: "img/my-new-family-treats-me-well-cover_upscayl_8x_realesrgan-x4plus.png" },
+            { title: "Another Manga", cover: "img/cover.png" }
+        ];
+
+        // Render manga items
+        function renderManga(mangaList) {
+            const mangaGrid = document.getElementById('manga-grid');
+            mangaGrid.innerHTML = mangaList.map(manga => `
+                <div class="manga-item">
+                    <img src="${manga.cover}" alt="${manga.title}">
+                    <h3>${manga.title}</h3>
+                </div>
+            `).join('');
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+
+        searchButton.addEventListener('click', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredManga = mangaData.filter(manga => 
+                manga.title.toLowerCase().includes(searchTerm)
+            );
+            renderManga(filteredManga);
+        });
+
+        // Initial render
+        renderManga(mangaData);
+    </script>
+    <script src="js/humdark.js"></script>
+</body>
+</html>

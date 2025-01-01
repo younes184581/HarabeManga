@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarks - HarabeManga</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="require-auth">
+    <header>
+        <nav class="navbar">
+            <div class="logo">HarabeManga</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="mangaList.html"><i class="fas fa-book"></i> قائمة المانجا</a></li>
+                <li><a href="tags.html"><i class="fas fa-tags"></i> التصنيفات</a></li>
+                <li><a href="joinUs.html"><i class="fa-brands fa-discord"></i> انضم إلينا</a></li>
+                <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Bookmarks</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Bookmarks</h1>
+        <div class="bookmarks-container" id="bookmarks-container">
+            <!-- Bookmarks will be dynamically added here -->
+        </div>
+    </main>
+    
+    <script src="js/humdark.js"></script>
+    <script>
+        // Load bookmarks
+        function loadBookmarks() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+            const container = document.getElementById('bookmarks-container');
+            container.innerHTML = '';
+            
+            Object.entries(bookmarks).forEach(([mangaId, bookmark]) => {
+                const bookmarkItem = document.createElement('div');
+                bookmarkItem.className = 'bookmark-item';
+                bookmarkItem.innerHTML = `
+                    <div class="bookmark-content">
+                        <img src="${bookmark.cover}" alt="${bookmark.title}" class="bookmark-cover">
+                        <div class="bookmark-info">
+                            <a href="mangaDetail.html?mangaId=${mangaId}" class="bookmark-link">
+                                ${bookmark.title}
+                            </a>
+                            <div class="bookmark-date">${new Date(bookmark.timestamp).toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <button class="remove-bookmark" data-manga-id="${mangaId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(bookmarkItem);
+            });
+        }
+
+        // Remove bookmark
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-bookmark')) {
+                const mangaId = e.target.closest('.remove-bookmark').dataset.mangaId;
+                const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+                delete bookmarks[mangaId];
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                loadBookmarks();
+                alert('Bookmark removed');
+            }
+        });
+
+        // Load bookmarks on page load
+        loadBookmarks();
+    </script>
+</body>
+</html>

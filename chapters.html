@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapters</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">HarabeManga</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="mangaList.html"><i class="fas fa-book"></i> قائمة المانجا</a></li>
+                <li><a href="tags.html"><i class="fas fa-tags"></i> التصنيفات</a></li>
+                <li><a href="joinUs.html"><i class="fa-brands fa-discord"></i> انضم إلينا</a></li>
+                <li><a href="joinUs.html"><i class="fas fa-user"></i>الحساب</a></li>
+            </ul>
+        </nav>        
+    </header>
+    <main>
+        <h2 id="chapter-title">Chapter Images</h2>
+        <div id="images-container">
+            <!-- Images will be dynamically added here -->
+        </div>
+        <div class="chapter-navigation">
+            <button id="prev-chapter-btn" class="nav-button"><i class="fas fa-chevron-left"></i></button>
+            <button id="next-chapter-btn" class="nav-button"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </main>
+    <link rel="stylesheet" href="css/chapters.css">
+    <script type="module" src="js/firebase.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/chapters.js"></script>
+    <script type="module">
+      import { auth, database } from './js/firebase.js';
+      import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+      import { ref, set } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
+
+      const chapterData = {
+        1: {
+          1: [
+            `https://files.fm/thumb_show.php?i=366eybdkxq`,
+            `https://files.fm/thumb_show.php?i=y9f8zzhtsu`,
+            `https://files.fm/thumb_show.php?i=xgpum5p7er`,
+            `https://files.fm/thumb_show.php?i=q7nazps9gj`,
+            `https://files.fm/thumb_show.php?i=t6trkcqjhh`,
+            `https://files.fm/thumb_show.php?i=cfr3wnkvpc`,
+            `https://files.fm/thumb_show.php?i=345vw248uc`,
+            `https://files.fm/thumb_show.php?i=c47wgfdw3a`,
+          ],
+
+        },
+        2: {
+          1: [
+            `https://drive.google.com/uc?id=YOUR_CHAPTER_2_1_IMAGE_ID_1`,
+            `https://drive.google.com/uc?id=YOUR_CHAPTER_2_1_IMAGE_ID_2`,
+            `https://drive.google.com/uc?id=YOUR_CHAPTER_2_1_IMAGE_ID_3`
+          ],
+          2: [
+            `https://drive.google.com/uc?id=YOUR_CHAPTER_2_2_IMAGE_ID_1`,
+            `https://drive.google.com/uc?id=YOUR_CHAPTER_2_2_IMAGE_ID_2`,
+            `https://drive.google.com/uc?id=YOUR_CHAPTER_2_2_IMAGE_ID_3`
+          ]
+        }
+      };
+
+      const mangaData = {
+        1: {
+            title: "ليبوشي ماري",
+            description: "الممثلة المشهورة ماري في فندق الحب",
+            image: "https://files.fm/thumb_show.php?i=ahwabp4haa",
+            chapters: [
+                { id: 1, title: "ون شوت" },
+            ]
+        },
+        2: {
+            title: "another manga 2",
+            description: "Description for another manga 2.",
+            image: "img/my-new-family-treats-me-well-cover_upscayl_8x_realesrgan-x4plus.png",
+            chapters: [
+                { id: 1, title: "Chapter 1" },
+                { id: 2, title: "Chapter 2" }
+            ]
+        },
+        3: {
+            title: "another manga 3",
+            description: "Description for another manga 3.",
+            image: "img/my-new-family-treats-me-well-cover_upscayl_8x_realesrgan-x4plus.png",
+            chapters: [
+                { id: 1, title: "Chapter 1" },
+                { id: 2, title: "Chapter 2" }
+            ]
+        }
+      };
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const coverId = urlParams.get('cover');
+      const chapterId = urlParams.get('chapter');
+      const mangaTitle = mangaData[coverId]?.title || `Cover ${coverId}`;
+      document.getElementById('chapter-title').innerText = `${mangaTitle} - Chapter ${chapterId}`;
+
+      const images = chapterData[coverId][chapterId];
+      const imagesContainer = document.getElementById('images-container');
+      images.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Chapter ${chapterId} Image`;
+        img.className = 'chapter-image';
+        imagesContainer.appendChild(img);
+      });
+
+      // Track chapter view
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const chapterViewRef = ref(database, `users/${user.uid}/chapterViews/${coverId}/${chapterId}`);
+          set(chapterViewRef, {
+            timestamp: Date.now()
+          });
+        }
+      });
+    </script>
+    <script src="js/humdark.js"></script>
+</body>
+</html>
